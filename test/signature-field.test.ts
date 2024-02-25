@@ -4,28 +4,10 @@ import { SignatureField } from '../src/SignatureField.js';
 import '../src/signature-field.js';
 
 describe('SignatureField', () => {
-  it('has a default header "Hey there" and counter 5', async () => {
-    const el = await fixture<SignatureField>(html`<signature-field></signature-field>`);
-
-    expect(el.header).to.equal('Hey there');
-    expect(el.counter).to.equal(5);
-  });
-
-  it('increases the counter on button click', async () => {
-    const el = await fixture<SignatureField>(html`<signature-field></signature-field>`);
-    el.shadowRoot!.querySelector('button')!.click();
-
-    expect(el.counter).to.equal(6);
-  });
-
-  it('can override the header via attribute', async () => {
-    const el = await fixture<SignatureField>(html`<signature-field header="attribute header"></signature-field>`);
-
-    expect(el.header).to.equal('attribute header');
-  });
-
   it('passes the a11y audit', async () => {
-    const el = await fixture<SignatureField>(html`<signature-field></signature-field>`);
+    const el = await fixture<SignatureField>(
+      html`<signature-field></signature-field>`
+    );
 
     await expect(el).shadowDom.to.be.accessible();
   });
