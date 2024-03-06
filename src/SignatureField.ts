@@ -18,17 +18,14 @@ export class SignatureField extends LitElement {
   @query('#canvas')
   canvas!: HTMLCanvasElement;
 
-  get ctx(): CanvasRenderingContext2D {
-    return this.canvas.getContext('2d')!;
-  }
-
   async onCanvasPointerMove(event: PointerEvent) {
-    console.log(event.pressure);
-
+    console.log(event);
     const strokeColor = '#000';
     const pointSize = 0.1 + event.pressure * 10;
-    this.ctx.fillStyle = strokeColor;
-    this.ctx.fillRect(event.pageX, event.pageY, pointSize, pointSize);
+
+    const ctx = this.canvas.getContext('2d')!;
+    ctx.fillStyle = strokeColor;
+    ctx.fillRect(event.pageX, event.pageY, pointSize, pointSize);
 
     const { ink } = navigator as any;
     const presenter = await ink.requestPresenter({
