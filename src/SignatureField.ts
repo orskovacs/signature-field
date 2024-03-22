@@ -35,6 +35,7 @@ export class SignatureField extends LitElement {
         @pointerdown=${this.onPointerDown}
         @pointerup=${this.onPointerUp}
         @pointerrawupdate=${this.onPointerRawUpdate}
+        @contextmenu=${this.onContextMenu}
       >
       </canvas>
     `;
@@ -58,6 +59,11 @@ export class SignatureField extends LitElement {
     for (const e of event.getCoalescedEvents()) {
       this.handlePointerEvent(e);
     }
+  }
+
+  private onContextMenu(event: Event) {
+    event.preventDefault();
+    this.clearCanvas();
   }
 
   private startDrawing(event: PointerEvent): void {
@@ -120,5 +126,9 @@ export class SignatureField extends LitElement {
     const y = event.pageY - this.canvas.offsetTop;
 
     return [x, y];
+  }
+
+  private clearCanvas(): void {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 }
