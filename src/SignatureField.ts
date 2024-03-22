@@ -15,27 +15,15 @@ export class SignatureField extends LitElement {
     }
   `;
 
+  private static readonly strokeColor: '#000';
+
   @query('#canvas')
-  canvas!: HTMLCanvasElement;
+  private canvas!: HTMLCanvasElement;
 
-  async onCanvasPointerMove(event: PointerEvent) {
-    console.log(event);
-    const strokeColor = '#000';
-    const pointSize = 0.1 + event.pressure * 10;
+  private isDrawing: boolean = false;
 
-    const ctx = this.canvas.getContext('2d')!;
-    ctx.fillStyle = strokeColor;
-    ctx.fillRect(event.pageX, event.pageY, pointSize, pointSize);
-
-    const { ink } = navigator as any;
-    const presenter = await ink.requestPresenter({
-      presentationArea: this.canvas,
-    });
-
-    presenter.updateInkTrailStartPoint(event, {
-      color: strokeColor,
-      diameter: pointSize,
-    });
+  private get context(): CanvasRenderingContext2D {
+    return this.canvas.getContext('2d')!;
   }
 
   render() {
@@ -44,10 +32,93 @@ export class SignatureField extends LitElement {
         id="canvas"
         width=${window.innerWidth}
         height=${window.innerHeight}
-        @pointerdown=${this.onCanvasPointerMove}
-        @pointermove=${this.onCanvasPointerMove}
+        @pointerdown=${this.onPointerDown}
+        @pointerup=${this.onPointerUp}
+        @pointerrawupdate=${this.onPointerRawUpdate}
       >
       </canvas>
     `;
+  }
+
+  private onPointerDown(event: PointerEvent): void {
+    this.startDrawing(event);
+  }
+
+  private onPointerUp(): void {
+    this.stopDrawing();
+  }
+
+  private onPointerRawUpdate(event: PointerEvent): void {
+    /* https://w3c.github.io/pointerevents/#dfn-coalesced-events
+      The parent event is an aggregation of the coalesced events,
+      so either the parent events or all of the coalesced events
+      need to be processed, but not both.
+     */
+
+    for (const e of event.getCoalescedEvents()) {
+      this.handlePointerEvent(e);
+    }
+  }
+
+  private startDrawing(event: PointerEvent): void {
+    this.isDrawing = true;
+
+    this.context.fillStyle = SignatureField.strokeColor;
+    this.context.lineCap = 'round';
+
+    this.context.beginPath();
+    this.context.moveTo(...this.getCoordsFromEvent(event));
+  }
+
+  private stopDrawing() {
+    this.isDrawing = false;
+  }
+
+  private handlePointerEvent(event: PointerEvent) {
+    const pointSize = 0.1 + event.pressure * 7;
+
+    if (!this.isDrawing) {
+      return;
+    }
+
+    const [x, y] = this.getCoordsFromEvent(event);
+
+    this.context.lineWidth = pointSize;
+
+    this.context.lineTo(x, y);
+    this.context.stroke();
+
+    this.context.beginPath();
+    this.context.moveTo(x, y);
+
+    // const { ink } = navigator;
+
+    // if (ink === undefined) {
+    //   console.log('Ink is not supported by Navigator');
+    //   return;
+    // }
+
+    // const presenter = await ink.requestPresenter({
+    //   presentationArea: this.canvas,
+    // });
+
+    // if (presenter.expectedImprovement === 0) {
+    //   console.log(
+    //     `Expected improvement from Ink is ${presenter.expectedImprovement}ms`
+    //   );
+    //   return;
+    // }
+
+    // presenter.updateInkTrailStartPoint(event, {
+    //   color: '#000',
+    //   diameter: pointSize,
+    // });
+  }
+
+  private getCoordsFromEvent(event: PointerEvent): [x: number, y: number] {
+    const x = event.pageX - this.canvas.offsetLeft;
+    const y = event.pageY - this.canvas.offsetTop;
+
+    return [x, y];
   }
 }
