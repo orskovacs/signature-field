@@ -57,7 +57,7 @@ export class SignatureField extends LitElement {
      */
 
     for (const e of event.getCoalescedEvents()) {
-      this.handlePointerEvent(e);
+      this.drawFromPointerEvent(e);
     }
   }
 
@@ -80,7 +80,7 @@ export class SignatureField extends LitElement {
     this.isDrawing = false;
   }
 
-  private handlePointerEvent(event: PointerEvent) {
+  private drawFromPointerEvent(event: PointerEvent) {
     const pointSize = 0.1 + event.pressure * 7;
 
     if (!this.isDrawing) {
