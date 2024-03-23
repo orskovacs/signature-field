@@ -1,5 +1,7 @@
 import { html, css, LitElement } from 'lit';
 import { query } from 'lit/decorators.js';
+import { SignatureDataPoint } from './signature-data-point.js';
+import { Signature } from './signature.js';
 
 export class SignatureField extends LitElement {
   static styles = css`
@@ -10,8 +12,7 @@ export class SignatureField extends LitElement {
 
     canvas {
       touch-action: none;
-      width: 100%;
-      height: 100%;
+      border: 1px solid red;
     }
   `;
 
@@ -22,6 +23,10 @@ export class SignatureField extends LitElement {
 
   private isDrawing: boolean = false;
 
+  private signatures: Signature[] = [];
+
+  private dataPoints: SignatureDataPoint[] = [];
+
   private get context(): CanvasRenderingContext2D {
     return this.canvas.getContext('2d')!;
   }
@@ -30,14 +35,15 @@ export class SignatureField extends LitElement {
     return html`
       <canvas
         id="canvas"
-        width=${window.innerWidth}
-        height=${window.innerHeight}
+        width="1000px"
+        height="700px"
         @pointerdown=${this.onPointerDown}
         @pointerup=${this.onPointerUp}
         @pointerrawupdate=${this.onPointerRawUpdate}
-        @contextmenu=${this.onContextMenu}
       >
       </canvas>
+      <button @click=${this.onClearClick}>Clear</button>
+      <button @click=${this.onAddClick}>Add</button>
     `;
   }
 
@@ -58,12 +64,19 @@ export class SignatureField extends LitElement {
 
     for (const e of event.getCoalescedEvents()) {
       this.drawFromPointerEvent(e);
+      this.createNewDataPoint(e);
     }
   }
 
-  private onContextMenu(event: Event) {
-    event.preventDefault();
+  private onClearClick() {
     this.clearCanvas();
+    this.clearDataPoints();
+  }
+
+  private onAddClick() {
+    this.assembleDataPointsIntoSignature();
+    this.clearCanvas();
+    this.clearDataPoints();
   }
 
   private startDrawing(event: PointerEvent): void {
@@ -121,6 +134,21 @@ export class SignatureField extends LitElement {
     // });
   }
 
+  private createNewDataPoint(event: PointerEvent) {
+    const dataPoint: SignatureDataPoint = {
+      timeStamp: event.timeStamp,
+      pressure: event.pressure,
+      xCoord: event.x,
+      yCoord: event.y,
+    };
+    this.dataPoints.push(dataPoint);
+  }
+
+  private assembleDataPointsIntoSignature() {
+    const signature = new Signature(this.dataPoints);
+    this.signatures.push(signature);
+  }
+
   private getCoordsFromEvent(event: PointerEvent): [x: number, y: number] {
     const x = event.pageX - this.canvas.offsetLeft;
     const y = event.pageY - this.canvas.offsetTop;
@@ -130,5 +158,9 @@ export class SignatureField extends LitElement {
 
   private clearCanvas(): void {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  private clearDataPoints(): void {
+    this.dataPoints = [];
   }
 }
