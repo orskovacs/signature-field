@@ -1,1 +1,1 @@
-export { SignatureField } from './SignatureField.js';
+export { SignatureField } from './elements/signature-field/SignatureField.js';

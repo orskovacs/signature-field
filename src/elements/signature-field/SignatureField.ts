@@ -1,7 +1,7 @@
 import { html, css, LitElement } from 'lit';
 import { query } from 'lit/decorators.js';
-import { SignatureDataPoint } from './signature-data-point.js';
-import { Signature } from './signature.js';
+import { SignatureDataPoint } from '../../models/signature-data-point.js';
+import { Signature } from '../../models/signature.js';
 
 export class SignatureField extends LitElement {
   static styles = css`

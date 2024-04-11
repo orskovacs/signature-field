@@ -1,5 +1,5 @@
 import { html, TemplateResult } from 'lit';
-import '../src/signature-field.js';
+import '../src/elements/signature-field/signature-field.js';
 
 export default {
   title: 'SignatureField',
