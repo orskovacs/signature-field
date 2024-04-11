@@ -1,7 +1,10 @@
 export type SignatureDataPoint = {
-  // timeStamp: Date;
-  // xCoord: number;
-  // yCoord: number;
-  // pressure: number;
-  [key: string]: any;
+  timeStamp: number;
+  xCoord: number;
+  yCoord: number;
+  pressure: number;
+  altitudeAngle: number;
+  azimuthAngle: number;
+  height: number;
+  twist: number;
 };

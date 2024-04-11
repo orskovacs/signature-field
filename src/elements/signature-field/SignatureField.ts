@@ -1,7 +1,9 @@
 import { html, css, LitElement } from 'lit';
-import { query } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
+import { ItemTemplate, repeat } from 'lit/directives/repeat.js';
 import { SignatureDataPoint } from '../../models/signature-data-point.js';
 import { Signature } from '../../models/signature.js';
+import { exportToJson } from '../../utils/signature-exporter.js';
 
 export class SignatureField extends LitElement {
   static styles = css`
@@ -23,8 +25,10 @@ export class SignatureField extends LitElement {
 
   private isDrawing: boolean = false;
 
+  @state()
   private signatures: Signature[] = [];
 
+  @state()
   private dataPoints: SignatureDataPoint[] = [];
 
   private get context(): CanvasRenderingContext2D {
@@ -32,18 +36,53 @@ export class SignatureField extends LitElement {
   }
 
   render() {
+    const signatureListItemTemplate: ItemTemplate<Signature> = s =>
+      html`<li>
+        <span>${new Date(s.creationTimeStamp).toLocaleString()}</span>
+        <button @click=${() => this.deleteSignature(s)}>Delete</button>
+        <button @click=${() => this.saveSignature(s)}>Save</button>
+      </li>`;
+
     return html`
       <canvas
         id="canvas"
-        width="1000px"
-        height="700px"
+        width="500px"
+        height="300px"
         @pointerdown=${this.onPointerDown}
         @pointerup=${this.onPointerUp}
         @pointerrawupdate=${this.onPointerRawUpdate}
       >
       </canvas>
-      <button @click=${this.onClearClick}>Clear</button>
-      <button @click=${this.onAddClick}>Add</button>
+      <div>
+        <button @click=${this.onClearClick}>Clear</button>
+        <button
+          ?disabled=${this.dataPoints.length === 0}
+          @click=${this.onAddClick}
+        >
+          Add
+        </button>
+      </div>
+      <div>
+        <button
+          ?disabled=${this.signatures.length === 0}
+          @click=${() => this.deleteAllSignatures()}
+        >
+          Delete all
+        </button>
+        <button
+          ?disabled=${this.signatures.length === 0}
+          @click=${() => this.saveAllSignatures()}
+        >
+          Save all
+        </button>
+        <ol>
+          ${repeat(
+            this.signatures,
+            s => s.creationTimeStamp,
+            signatureListItemTemplate
+          )}
+        </ol>
+      </div>
     `;
   }
 
@@ -135,18 +174,29 @@ export class SignatureField extends LitElement {
   }
 
   private createNewDataPoint(event: PointerEvent) {
+    if (
+      !('altitudeAngle' in event && typeof event.altitudeAngle === 'number') ||
+      !('azimuthAngle' in event && typeof event.azimuthAngle === 'number')
+    ) {
+      return;
+    }
+
     const dataPoint: SignatureDataPoint = {
       timeStamp: event.timeStamp,
       pressure: event.pressure,
       xCoord: event.x,
       yCoord: event.y,
+      altitudeAngle: event.altitudeAngle,
+      azimuthAngle: event.azimuthAngle,
+      height: event.height,
+      twist: event.twist,
     };
-    this.dataPoints.push(dataPoint);
+    this.dataPoints = [...this.dataPoints, dataPoint];
   }
 
   private assembleDataPointsIntoSignature() {
     const signature = new Signature(this.dataPoints);
-    this.signatures.push(signature);
+    this.signatures = [...this.signatures, signature];
   }
 
   private getCoordsFromEvent(event: PointerEvent): [x: number, y: number] {
@@ -162,5 +212,22 @@ export class SignatureField extends LitElement {
 
   private clearDataPoints(): void {
     this.dataPoints = [];
+  }
+
+  private deleteSignature(signature: Signature): void {
+    this.signatures = this.signatures.filter(s => s !== signature);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private saveSignature(signature: Signature): void {
+    exportToJson([signature]);
+  }
+
+  private saveAllSignatures(): void {
+    exportToJson(this.signatures);
+  }
+
+  private deleteAllSignatures(): void {
+    this.signatures = [];
   }
 }
