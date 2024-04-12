@@ -8,13 +8,73 @@ import { exportToJson } from '../../utils/signature-exporter.js';
 export class SignatureField extends LitElement {
   static styles = css`
     :host {
-      display: block;
+      display: inline-grid;
+      grid-template-columns: min-content auto;
+      grid-gap: 8px;
+
       color: var(--signature-field-text-color, #000);
+      font-family: var(--signature-field-font-family, Arial);
+      font-size: 14px;
     }
 
     canvas {
       touch-action: none;
-      border: 1px solid red;
+      border: 1px solid black;
+    }
+
+    .button {
+      --color: #008cba;
+      --bg-color: #ffffff;
+      --text-color: #000000;
+
+      padding: 8px 16px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      transition-property: color, background-color, border;
+      transition-duration: 0.25s;
+      cursor: pointer;
+
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      border: 2px solid var(--color);
+    }
+
+    .button.red {
+      --color: #f44336;
+    }
+
+    .button:disabled {
+      --color: #e7e7e7;
+      --text-color: #e7e7e7;
+
+      cursor: default;
+    }
+
+    .button:disabled:hover {
+      background-color: var(--bg-color);
+      color: var(--color);
+    }
+
+    .button:hover {
+      background-color: var(--color);
+      color: var(--bg-color);
+    }
+
+    .signature-list {
+      display: grid;
+      grid-gap: 8px;
+      align-items: center;
+      justify-content: start;
+      justify-items: stretch;
+      grid-template-columns: 200px 120px 120px;
+      margin-top: 48px;
+
+      grid-column: 1 / 3;
+    }
+
+    .signature-list .empty-list-indicator {
+      grid-column: 1/4;
     }
   `;
 
@@ -37,11 +97,23 @@ export class SignatureField extends LitElement {
 
   render() {
     const signatureListItemTemplate: ItemTemplate<Signature> = s =>
-      html`<li>
+      html`
         <span>${new Date(s.creationTimeStamp).toLocaleString()}</span>
-        <button @click=${() => this.deleteSignature(s)}>Delete</button>
-        <button @click=${() => this.saveSignature(s)}>Save</button>
-      </li>`;
+        <button
+          class="button red"
+          type="button"
+          @click=${() => this.deleteSignature(s)}
+        >
+          Delete
+        </button>
+        <button
+          class="button"
+          type="button"
+          @click=${() => this.saveSignature(s)}
+        >
+          Save
+        </button>
+      `;
 
     return html`
       <canvas
@@ -53,35 +125,47 @@ export class SignatureField extends LitElement {
         @pointerrawupdate=${this.onPointerRawUpdate}
       >
       </canvas>
-      <div>
-        <button @click=${this.onClearClick}>Clear</button>
+      <div class="field-controls">
+        <button class="button" type="button" @click=${this.onClearClick}>
+          Clear
+        </button>
         <button
+          class="button"
+          type="button"
           ?disabled=${this.dataPoints.length === 0}
           @click=${this.onAddClick}
         >
           Add
         </button>
       </div>
-      <div>
+      <div class="signature-list">
+        <span>Signatures</span>
         <button
+          class="button red"
+          type="button"
           ?disabled=${this.signatures.length === 0}
           @click=${() => this.deleteAllSignatures()}
         >
           Delete all
         </button>
         <button
+          class="button"
+          type="button"
           ?disabled=${this.signatures.length === 0}
           @click=${() => this.saveAllSignatures()}
         >
           Save all
         </button>
-        <ol>
-          ${repeat(
-            this.signatures,
-            s => s.creationTimeStamp,
-            signatureListItemTemplate
-          )}
-        </ol>
+        ${this.signatures.length === 0
+          ? html`<div class="empty-list-indicator">
+              No signature has been added to the list
+            </div>`
+          : ''}
+        ${repeat(
+          this.signatures,
+          s => s.creationTimeStamp,
+          signatureListItemTemplate
+        )}
       </div>
     `;
   }
