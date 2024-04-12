@@ -1,5 +1,5 @@
 import { html, css, LitElement } from 'lit';
-import { query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { ItemTemplate, repeat } from 'lit/directives/repeat.js';
 import { SignatureDataPoint } from '../../models/signature-data-point.js';
 import { Signature } from '../../models/signature.js';
@@ -95,6 +95,12 @@ export class SignatureField extends LitElement {
     return this.canvas.getContext('2d')!;
   }
 
+  @property({ type: String })
+  public width: string = '400px';
+
+  @property({ type: String })
+  public height: string = '250px';
+
   render() {
     const signatureListItemTemplate: ItemTemplate<Signature> = s =>
       html`
@@ -118,8 +124,8 @@ export class SignatureField extends LitElement {
     return html`
       <canvas
         id="canvas"
-        width="500px"
-        height="300px"
+        width=${this.width}
+        height=${this.height}
         @pointerdown=${this.onPointerDown}
         @pointerup=${this.onPointerUp}
         @pointerrawupdate=${this.onPointerRawUpdate}
