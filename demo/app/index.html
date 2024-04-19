@@ -3,13 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="stylesheet" href="../demo.css" />
+    <link rel="stylesheet" href="app/styles.css" />
     <title>App</title>
   </head>
 
   <body>
-    <script type="module">
-      import '../dist/src/signature-field.js';
-    </script>
+    <label>Material 3<md-checkbox checked></md-checkbox></label>
+    <md-outlined-button>Back</md-outlined-button>
+    <md-filled-button>Next</md-filled-button>
+    <div>
+      <signature-field />
+    </div>
+
+    <script type="module" src="app/index.js"></script>
   </body>
 </html>
