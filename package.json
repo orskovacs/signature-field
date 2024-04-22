@@ -24,8 +24,6 @@
     "storybook:build": "tsc && npm run analyze -- --exclude dist && build-storybook"
   },
   "dependencies": {
-    "@material/material-color-utilities": "^0.2.7",
-    "@material/web": "^1.4.1",
     "lit": "^2.0.2"
   },
   "devDependencies": {
