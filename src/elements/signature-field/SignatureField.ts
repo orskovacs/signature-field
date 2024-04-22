@@ -101,6 +101,9 @@ export class SignatureField extends LitElement {
   @property({ type: String })
   public height: string = '250px';
 
+  @property({ type: Boolean })
+  public noControls: boolean = false;
+
   render() {
     const signatureListItemTemplate: ItemTemplate<Signature> = s =>
       html`
@@ -121,16 +124,22 @@ export class SignatureField extends LitElement {
         </button>
       `;
 
+    const canvasTemplate = html`<canvas
+      id="canvas"
+      width=${this.width}
+      height=${this.height}
+      @pointerdown=${this.onPointerDown}
+      @pointerup=${this.onPointerUp}
+      @pointerrawupdate=${this.onPointerRawUpdate}
+    >
+    </canvas>`;
+
+    if (this.noControls) {
+      return canvasTemplate;
+    }
+
     return html`
-      <canvas
-        id="canvas"
-        width=${this.width}
-        height=${this.height}
-        @pointerdown=${this.onPointerDown}
-        @pointerup=${this.onPointerUp}
-        @pointerrawupdate=${this.onPointerRawUpdate}
-      >
-      </canvas>
+      ${canvasTemplate}
       <div class="field-controls">
         <button class="button" type="button" @click=${this.onClearClick}>
           Clear
@@ -198,8 +207,7 @@ export class SignatureField extends LitElement {
   }
 
   private onClearClick() {
-    this.clearCanvas();
-    this.clearDataPoints();
+    this.clear();
   }
 
   private onAddClick() {
@@ -319,5 +327,10 @@ export class SignatureField extends LitElement {
 
   private deleteAllSignatures(): void {
     this.signatures = [];
+  }
+
+  public clear() {
+    this.clearCanvas();
+    this.clearDataPoints();
   }
 }
