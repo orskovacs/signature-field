@@ -89,7 +89,11 @@ export class SignatureField extends LitElement {
   private signatures: Signature[] = [];
 
   @state()
-  private dataPoints: SignatureDataPoint[] = [];
+  private _dataPoints: SignatureDataPoint[] = [];
+
+  public get dataPoints(): SignatureDataPoint[] {
+    return [...this._dataPoints];
+  }
 
   private get context(): CanvasRenderingContext2D {
     return this.canvas.getContext('2d')!;
@@ -147,7 +151,7 @@ export class SignatureField extends LitElement {
         <button
           class="button"
           type="button"
-          ?disabled=${this.dataPoints.length === 0}
+          ?disabled=${this._dataPoints.length === 0}
           @click=${this.onAddClick}
         >
           Add
@@ -289,11 +293,11 @@ export class SignatureField extends LitElement {
       height: event.height,
       twist: event.twist,
     };
-    this.dataPoints = [...this.dataPoints, dataPoint];
+    this._dataPoints = [...this._dataPoints, dataPoint];
   }
 
   private assembleDataPointsIntoSignature() {
-    const signature = new Signature(this.dataPoints);
+    const signature = new Signature(this._dataPoints);
     this.signatures = [...this.signatures, signature];
   }
 
@@ -309,7 +313,7 @@ export class SignatureField extends LitElement {
   }
 
   private clearDataPoints(): void {
-    this.dataPoints = [];
+    this._dataPoints = [];
   }
 
   private deleteSignature(signature: Signature): void {
