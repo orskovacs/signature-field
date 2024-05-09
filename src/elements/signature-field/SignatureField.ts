@@ -283,11 +283,13 @@ export class SignatureField extends LitElement {
       return;
     }
 
+    const [xCoord, yCoord] = this.getCoordsFromEvent(event);
+
     const dataPoint: SignatureDataPoint = {
       timeStamp: event.timeStamp,
       pressure: event.pressure,
-      xCoord: event.x,
-      yCoord: event.y,
+      xCoord,
+      yCoord,
       altitudeAngle: event.altitudeAngle,
       azimuthAngle: event.azimuthAngle,
       height: event.height,
