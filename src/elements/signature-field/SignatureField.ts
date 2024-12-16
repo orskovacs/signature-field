@@ -1,4 +1,4 @@
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { ItemTemplate, repeat } from 'lit/directives/repeat.js';
 import { SignatureDataPoint } from '../../models/signature-data-point.js';
@@ -134,7 +134,12 @@ export class SignatureField extends LitElement {
       height=${this.height}
       @pointerdown=${this.onPointerDown}
       @pointerup=${this.onPointerUp}
-      @pointerrawupdate=${this.onPointerRawUpdate}
+      @pointerrawupdate=${'onpointerrawupdate' in HTMLCanvasElement.prototype
+        ? this.onPointerEvent
+        : nothing}
+      @pointermove=${!('onpointerrawupdate' in HTMLCanvasElement.prototype)
+        ? this.onPointerEvent
+        : nothing}
     >
     </canvas>`;
 
@@ -197,7 +202,7 @@ export class SignatureField extends LitElement {
     this.stopDrawing();
   }
 
-  private onPointerRawUpdate(event: PointerEvent): void {
+  private onPointerEvent(event: PointerEvent): void {
     /* https://w3c.github.io/pointerevents/#dfn-coalesced-events
       The parent event is an aggregation of the coalesced events,
       so either the parent events or all of the coalesced events
